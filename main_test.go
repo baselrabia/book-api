@@ -18,8 +18,6 @@ import (
 
 var (
 	bookJSON    = `{"title":"Sample Book","author":"John Doe","published":2020}`
-	db          *gorm.DB
-	bookHandler *handlers.BookHandler
 )
  
 
@@ -42,7 +40,7 @@ func TestCreateBook(t *testing.T) {
 
 	// Initialize the BookHandler with the GORM database connection
 	repo := repository.NewGormBookRepository(db)
-	bookHandler = handlers.NewBookHandler(repo)
+	bookHandler := handlers.NewBookHandler(repo)
 
 	// Assertions
 	if assert.NoError(t, bookHandler.CreateBook(c)) {
@@ -72,7 +70,7 @@ func TestGetBook(t *testing.T) {
 
 	// Initialize the BookHandler with the GORM database connection
 	repo := repository.NewGormBookRepository(db)
-	bookHandler = handlers.NewBookHandler(repo)
+	bookHandler := handlers.NewBookHandler(repo)
 
 	// Create a request with valid book data
 	bJSON := `{"title": "created Sample Book", "author": "John Doe", "published": 2020}`
@@ -92,7 +90,9 @@ func TestGetBook(t *testing.T) {
 	getReq := httptest.NewRequest(http.MethodGet, "/api/books/1", nil) // Assuming 1 is the ID of the created book
 	getRec := httptest.NewRecorder()
 	getContext := e.NewContext(getReq, getRec)
-
+	getContext.SetParamNames("id")
+	getContext.SetParamValues("1")
+	
 	// Assertions
 	if assert.NoError(t, bookHandler.GetBook(getContext)) {
 
@@ -117,7 +117,7 @@ func TestUpdateBook(t *testing.T) {
 	e := echo.New()
 	// Initialize the BookHandler with the GORM database connection
 	repo := repository.NewGormBookRepository(db)
-	bookHandler = handlers.NewBookHandler(repo)
+	bookHandler := handlers.NewBookHandler(repo)
 
 	// Create a request with valid book data
 	bJSON := `{"title": "created Sample Book", "author": "John Doe", "published": 2020}`
@@ -139,6 +139,8 @@ func TestUpdateBook(t *testing.T) {
 	updateReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	updateRec := httptest.NewRecorder()
 	updateContext := e.NewContext(updateReq, updateRec)
+	updateContext.SetParamNames("id")
+	updateContext.SetParamValues("1")
 
 	// Assertions
 	if assert.NoError(t, bookHandler.UpdateBook(updateContext)) {
@@ -165,7 +167,7 @@ func TestDeleteBook(t *testing.T) {
 		e := echo.New()
 		// Initialize the BookHandler with the GORM database connection
 		repo := repository.NewGormBookRepository(db)
-		bookHandler = handlers.NewBookHandler(repo)
+		bookHandler := handlers.NewBookHandler(repo)
 	
 		// Create a request with valid book data
 		bJSON := `{"title": "created Sample Book", "author": "John Doe", "published": 2020}`
@@ -185,6 +187,8 @@ func TestDeleteBook(t *testing.T) {
 	deleteReq := httptest.NewRequest(http.MethodDelete, "/api/books/1", nil) // Assuming 1 is the ID of the created book
 	deleteRec := httptest.NewRecorder()
 	deleteContext := e.NewContext(deleteReq, deleteRec)
+	deleteContext.SetParamNames("id")
+	deleteContext.SetParamValues("1")
 
 	// Assertions
 	if assert.NoError(t, bookHandler.DeleteBook(deleteContext)) {

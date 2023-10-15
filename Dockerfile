@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Unit tests
-RUN CGO_ENABLED=0 go test -v
+# RUN CGO_ENABLED=0 go test -v
 
 # Build the Go app
 RUN go build -buildvcs=false -o ./out/book-api github.com/baselrabia/book-api

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/baselrabia/book-api/models"
@@ -27,8 +26,6 @@ func validateBook(book *models.Book) error {
 
 func getIntId(c echo.Context) (uint, error) {
 	idStr := c.Param("id")
-	fmt.Println("hhhhhhhhhhh", idStr)
-
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		return 0, err

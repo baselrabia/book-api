@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/baselrabia/book-api/models"
 	"github.com/baselrabia/book-api/repository"
@@ -81,15 +79,10 @@ func (h *BookHandler) UpdateBook(c echo.Context) error {
 }
 
 func (h *BookHandler) DeleteBook(c echo.Context) error {
-	pid, _ := strconv.Atoi(c.Param("id"))
-	fmt.Println("hhhhhhhhhwwwhh", 777, pid)
-	c.Logger().Info("Received DELETE request for task ID: ", pid)
-
 	id, err := getIntId(c)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid book ID")
 	}
-	fmt.Println("hhhhhhhhhhh", id)
 
 	if err := h.Repo.DeleteBook(id); err != nil {
 		return c.JSON(http.StatusNotFound, "Book not found")

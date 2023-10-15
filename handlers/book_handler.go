@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/baselrabia/book-api/dto"
 	"github.com/baselrabia/book-api/models"
 	"github.com/baselrabia/book-api/repository"
 	"github.com/labstack/echo/v4"
@@ -67,9 +68,16 @@ func (h *BookHandler) UpdateBook(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, "Book not found")
 	}
 
-	if err := c.Bind(book); err != nil {
-		return err
+	// Create a new dto.Book instance and bind the request data to it
+	updatedBook := new(dto.Book)
+	if err := c.Bind(updatedBook); err != nil {
+		return c.JSON(http.StatusBadRequest, "Invalid request data")
 	}
+
+	// Update the fields you want to change
+	book.Title = updatedBook.Title
+	book.Author = updatedBook.Author
+	book.Published = updatedBook.Published
 
 	if err := h.Repo.UpdateBook(book); err != nil {
 		return c.JSON(http.StatusInternalServerError, "Failed to update the book.")

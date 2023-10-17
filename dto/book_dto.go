@@ -1,7 +1,7 @@
 package dto
 
 type Book struct {
-	Title     string
-	Author    string
-	Published int
+	Title     string `json:"title"`
+	Author    string `json:"author"`
+	Published int    `json:"published"`
 }

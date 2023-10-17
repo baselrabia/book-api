@@ -19,7 +19,7 @@ func NewBookHandler(repo repository.BookRepository) *BookHandler {
 }
 
 func (h *BookHandler) CreateBook(c echo.Context) error {
-	book := new(models.Book)
+	book := new(dto.Book)
 	if err := c.Bind(book); err != nil {
 		log.Error(err.Error())
 		return err
@@ -69,14 +69,6 @@ func (h *BookHandler) UpdateBook(c echo.Context) error {
 		log.Error("Invalid book ID: ", err.Error())
 		return c.JSON(http.StatusBadRequest, "Invalid book ID")
 	}
-
-	// Parse and validate the ID
-	book, err := h.Repo.GetBookByID(id)
-	if err != nil {
-		log.Error("Book not found ", err.Error())
-		return c.JSON(http.StatusNotFound, "Book not found")
-	}
-
 	// Create a new dto.Book instance and bind the request data to it
 	var updatedBook dto.Book
 	if err := c.Bind(&updatedBook); err != nil {
@@ -84,18 +76,8 @@ func (h *BookHandler) UpdateBook(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "Invalid request data")
 	}
 
-	// Update the book fields if they are provided in the request
-	if updatedBook.Title != "" {
-		book.Title = updatedBook.Title
-	}
-	if updatedBook.Author != "" {
-		book.Author = updatedBook.Author
-	}
-	if updatedBook.Published != 0 {
-		book.Published = updatedBook.Published
-	}
-
-	if err := h.Repo.UpdateBook(book); err != nil {
+	book := new(models.Book)
+	if book, err = h.Repo.UpdateBook(id, &updatedBook); err != nil {
 		log.Error("Failed to update the book ", err.Error())
 		return c.JSON(http.StatusInternalServerError, "Failed to update the book.")
 	}

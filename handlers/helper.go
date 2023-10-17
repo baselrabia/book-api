@@ -4,11 +4,11 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/baselrabia/book-api/models"
+	"github.com/baselrabia/book-api/dto"
 	"github.com/labstack/echo/v4"
 )
 
-func validateBook(book *models.Book) error {
+func validateBook(book *dto.Book) error {
 	if book.Title == "" {
 		return errors.New("title is required")
 	}

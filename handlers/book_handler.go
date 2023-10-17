@@ -7,6 +7,7 @@ import (
 	"github.com/baselrabia/book-api/models"
 	"github.com/baselrabia/book-api/repository"
 	"github.com/labstack/echo/v4"
+	log "github.com/sirupsen/logrus"
 )
 
 type BookHandler struct {
@@ -20,14 +21,17 @@ func NewBookHandler(repo repository.BookRepository) *BookHandler {
 func (h *BookHandler) CreateBook(c echo.Context) error {
 	book := new(models.Book)
 	if err := c.Bind(book); err != nil {
+		log.Error(err.Error())
 		return err
 	}
 	// Validate the book data
 	if err := validateBook(book); err != nil {
+		log.Error(err.Error())
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
 
 	if err := h.Repo.CreateBook(book); err != nil {
+		log.Error("Failed to create the book. ", err.Error())
 		return c.JSON(http.StatusInternalServerError, "Failed to create the book.")
 	}
 
@@ -37,11 +41,13 @@ func (h *BookHandler) CreateBook(c echo.Context) error {
 func (h *BookHandler) GetBook(c echo.Context) error {
 	id, err := getIntId(c)
 	if err != nil {
+		log.Error("Invalid book ID: ", err.Error())
 		return c.JSON(http.StatusBadRequest, "Invalid book ID")
 	}
 
 	book, err := h.Repo.GetBookByID(id)
 	if err != nil {
+		log.Error("Book not found ", err.Error())
 		return c.JSON(http.StatusNotFound, "Book not found")
 	}
 
@@ -51,6 +57,7 @@ func (h *BookHandler) GetBook(c echo.Context) error {
 func (h *BookHandler) GetAllBooks(c echo.Context) error {
 	books, err := h.Repo.GetAllBooks()
 	if err != nil {
+		log.Error("Failed to retrieve books. ", err.Error())
 		return c.JSON(http.StatusInternalServerError, "Failed to retrieve books.")
 	}
 	return c.JSON(http.StatusOK, books)
@@ -59,27 +66,37 @@ func (h *BookHandler) GetAllBooks(c echo.Context) error {
 func (h *BookHandler) UpdateBook(c echo.Context) error {
 	id, err := getIntId(c)
 	if err != nil {
+		log.Error("Invalid book ID: ", err.Error())
 		return c.JSON(http.StatusBadRequest, "Invalid book ID")
 	}
 
 	// Parse and validate the ID
 	book, err := h.Repo.GetBookByID(id)
 	if err != nil {
+		log.Error("Book not found ", err.Error())
 		return c.JSON(http.StatusNotFound, "Book not found")
 	}
 
 	// Create a new dto.Book instance and bind the request data to it
-	updatedBook := new(dto.Book)
-	if err := c.Bind(updatedBook); err != nil {
+	var updatedBook dto.Book
+	if err := c.Bind(&updatedBook); err != nil {
+		log.Error("Invalid request data ", err.Error())
 		return c.JSON(http.StatusBadRequest, "Invalid request data")
 	}
 
-	// Update the fields you want to change
-	book.Title = updatedBook.Title
-	book.Author = updatedBook.Author
-	book.Published = updatedBook.Published
+	// Update the book fields if they are provided in the request
+	if updatedBook.Title != "" {
+		book.Title = updatedBook.Title
+	}
+	if updatedBook.Author != "" {
+		book.Author = updatedBook.Author
+	}
+	if updatedBook.Published != 0 {
+		book.Published = updatedBook.Published
+	}
 
 	if err := h.Repo.UpdateBook(book); err != nil {
+		log.Error("Failed to update the book ", err.Error())
 		return c.JSON(http.StatusInternalServerError, "Failed to update the book.")
 	}
 
@@ -89,10 +106,12 @@ func (h *BookHandler) UpdateBook(c echo.Context) error {
 func (h *BookHandler) DeleteBook(c echo.Context) error {
 	id, err := getIntId(c)
 	if err != nil {
+		log.Error("Invalid book ID: ", err.Error())
 		return c.JSON(http.StatusBadRequest, "Invalid book ID")
 	}
 
 	if err := h.Repo.DeleteBook(id); err != nil {
+		log.Error("Book not found ", err.Error())
 		return c.JSON(http.StatusNotFound, "Book not found")
 	}
 
